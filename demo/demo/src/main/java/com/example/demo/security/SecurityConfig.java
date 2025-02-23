@@ -1,10 +1,15 @@
 package com.example.demo.security;
 
+import com.example.demo.Service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -16,44 +21,28 @@ import org.springframework.security.core.userdetails.User;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    /**
-     * Define a PasswordEncoder bean so we can store and compare passwords securely.
-     */
+    private final CustomUserDetailsService customUserDetailsService;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return NoOpPasswordEncoder.getInstance();
     }
-
-    /**
-     * Create an in-memory user store with two users: an admin and a regular user.
-     */
+    public SecurityConfig(CustomUserDetailsService customUserDetailsService) {
+        this.customUserDetailsService = customUserDetailsService;
+    }
     @Bean
-    public InMemoryUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
-        return new InMemoryUserDetailsManager(
-                User.withUsername("admin")
-                        .password(passwordEncoder.encode("admin123"))
-                        .roles("ADMIN")
-                        .build(),
-                User.withUsername("user")
-                        .password(passwordEncoder.encode("user123"))
-                        .roles("USER")
-                        .build()
-        );
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
     }
 
-    /**
-     * Configure the security filter chain:
-     * - Restrict `/admin/**` to only ADMIN role.
-     * - Allow form-based login (built-in login page) and basic HTTP auth for testing.
-     * - All other endpoints require authentication but can be accessed by any authenticated user.
-     */
+
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         return http
                 .authorizeHttpRequests(auth -> auth
-                        // Only allow users with ADMIN role to access `/admin/**` endpoints
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasAnyRole("ADMIN", "USER", "MANAGER")
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
@@ -65,4 +54,5 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .build();
     }
+
 }

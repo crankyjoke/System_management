@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}/permissions")
-    public List<String> modifyUserPermissions(@PathVariable Long id, @RequestBody List<String> newPermissions) {
+    public String modifyUserPermissions(@PathVariable Long id, @RequestBody String newPermissions) {
         return userService.modifyPermission(newPermissions, id);
     }
 
