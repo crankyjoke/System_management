@@ -5,6 +5,7 @@ import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,11 +36,52 @@ public class UserService {
         user.setUsername(username);
         return userRepository.save(user);
     }
+//    public boolean deleteUser(Long id) {
+//
+//        if (userRepository.existsById(id)) { // ✅ Check if user exists before deleting
+//            userRepository.deleteById(id);
+//            return true;
+//        }
+//        return false; // Return false if user was not found
+//    }
+    @Transactional
+    public boolean deleteUser(Long id) {
+        Optional<User> userOptional = userRepository.findById(id);
 
+        if (userOptional.isPresent()) { // ✅ Ensure user exists
+            User user = userOptional.get();
 
-    public User createUser(String baseUsername, String rawPassword, String roles) {
+            // Prevent deletion of "admin1"
+            if ("admin1".equals(user.getUsername())) {
+                return false;
+            }
+
+            userRepository.deleteById(id);
+            return true;
+        }
+
+        return false; // Return false if user not found
+    }
+
+    public User createUser(String baseUsername,String rawPassword, String roles) {
 
         User newUser = new User();
+
+        newUser.setUsername(baseUsername);
+
+        newUser.setPassword(rawPassword);
+
+        newUser.setPermission(roles);
+
+        return userRepository.save(newUser);
+    }
+
+
+
+    public User createUser(String baseUsername, String email,String rawPassword, String roles) {
+
+        User newUser = new User();
+        newUser.setEmail(email);
 
         newUser.setUsername(baseUsername);
 

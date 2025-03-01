@@ -24,9 +24,11 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api")
 public class UserController {
     private final UserService userService;
+    private final AuthenticationManager authenticationManager;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService,AuthenticationManager authenticationManager) {
         this.userService = userService;
+        this.authenticationManager = authenticationManager;
     }
     @GetMapping("/adminpage")
     public String adminPage(){
@@ -38,7 +40,7 @@ public class UserController {
         return userService.getUserById(id);
     }
 
-    @GetMapping
+    @GetMapping("/getall")
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
@@ -51,6 +53,13 @@ public class UserController {
     @PutMapping("/{id}")
     public User updateUser(@PathVariable Long id, @RequestBody User user) {
         return userService.updateUser(id, user);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public boolean deleteUser(@PathVariable Long id){
+        boolean deleted = userService.deleteUser(id); // ✅ Ensure deleteUser() returns a boolean
+
+        return deleted;
     }
 
     @PutMapping("/{id}/permissions")
@@ -74,21 +83,19 @@ public class UserController {
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
-        HttpSession session = request.getSession(false); // Get existing session
+        HttpSession session = request.getSession(false);
         if (session != null) {
-            session.invalidate(); // ✅ Destroy the session
+            session.invalidate();
         }
-        SecurityContextHolder.clearContext(); // ✅ Clear authentication
+        SecurityContextHolder.clearContext();
 
         return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
-//    private final AuthenticationManager authenticationManager;
-//
-//    public UserController(AuthenticationManager authenticationManager) {
-//        this.authenticationManager = authenticationManager;
-//    }
+
+
+
 //    @PostMapping("/login")
-//    public ResponseEntity<?> login(@RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+//    public ResponseEntity<?> login(@RequestBody User request, HttpServletRequest httpRequest) {
 //        try {
 //            Authentication authentication = authenticationManager.authenticate(
 //                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
@@ -108,6 +115,7 @@ public class UserController {
 //            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid credentials"));
 //        }
 //    }
+
 
 
 }

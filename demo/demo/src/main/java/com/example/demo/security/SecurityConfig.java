@@ -19,30 +19,30 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Configuration
 public class SecurityConfig {
-
     @Bean
+
     public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance(); // ✅ No password encoding (for testing only)
+        return NoOpPasswordEncoder.getInstance();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
+                .httpBasic(httpBasic -> {})
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.addAllowedOrigin("http://localhost:8000"); // ✅ Allow frontend
+                    config.addAllowedOrigin("http://localhost:8000");
                     config.addAllowedMethod("*");
                     config.addAllowedHeader("*");
-                    config.setAllowCredentials(true); // ✅ Allow session-based authentication
+                    config.setAllowCredentials(true);
                     return config;
                 }))
-                .csrf(csrf -> csrf.disable()) // ❌ Disable CSRF for API authentication
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)) // Always create a session
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/logout", "/api/currentUser").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -70,17 +70,65 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID").clearAuthentication(true)
+                        .deleteCookies("JSESSIONID") // Ensure session cookie is removed
+                        .clearAuthentication(true)
                         .permitAll()
                 )
                 .build();
     }
 
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        return http
+//                .httpBasic(httpBasic -> {})
+//                .cors(cors -> cors.configurationSource(request -> {
+//                    CorsConfiguration config = new CorsConfiguration();
+//                    config.addAllowedOrigin("http://localhost:8000");
+//                    config.addAllowedMethod("*");
+//                    config.addAllowedHeader("*");
+//                    config.setAllowCredentials(true);
+//                    return config;
+//                }))
+//                .csrf(csrf -> csrf.disable())
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers("/login", "/logout", "/api/currentUser").permitAll()
+//                        .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .anyRequest().authenticated()
+//                )
+//                .formLogin(form -> form
+//                        .loginProcessingUrl("/login")
+//                        .successHandler((request, response, authentication) -> {
+//                            response.setContentType("application/json");
+//                            response.setCharacterEncoding("UTF-8");
+//                            PrintWriter writer = response.getWriter();
+//
+//                            // ✅ Store user in session
+//                            request.getSession().setAttribute("user", authentication.getName());
+//
+//                            Map<String, Object> responseData = new HashMap<>();
+//                            responseData.put("status", "ok");
+//                            responseData.put("message", "Login successful");
+//                            responseData.put("username", authentication.getName());
+//
+//                            writer.write(new ObjectMapper().writeValueAsString(responseData));
+//                            writer.flush();
+//                        })
+//                )
+//                .logout(logout -> logout
+//                        .logoutUrl("/logout")
+//                        .invalidateHttpSession(true)
+//                        .deleteCookies("JSESSIONID").clearAuthentication(true)
+//                        .permitAll()
+//                )
+//                .build();
+//    }
+
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("http://localhost:8000"); // ✅ Allow frontend requests
+        config.addAllowedOrigin("http://localhost:8000");
         config.addAllowedMethod("*");
         config.addAllowedHeader("*");
         config.setAllowCredentials(true);
