@@ -35,12 +35,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(userEntity.getUsername())
-                .password(userEntity.getPassword()) // Uses plain-text password
-                .roles((userEntity.getPermission())) // Convert List<String> to String[]
+                .password(userEntity.getPassword())
+                .roles((userEntity.getPermission()))
                 .build();
     }
 
     private String[] parseRoles(List<String> rolesList) {
-        return rolesList.toArray(new String[0]); // Convert List<String> to String[]
+        return rolesList.toArray(new String[0]);
     }
 }

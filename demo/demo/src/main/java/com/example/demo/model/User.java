@@ -58,6 +58,7 @@ public class User {
     }
 
     public void setPermission(String permission) {
+        System.out.println("permission updated");
         this.permission = permission;
     }
 

@@ -75,6 +75,45 @@ public class UserService {
 
         return userRepository.save(newUser);
     }
+    public boolean updateUsername(String newUsername,Long id){
+        Optional<User> userOptional = userRepository.findById(id);
+        if(userOptional.isPresent()){
+            User user = userOptional.get();
+            user.setUsername(newUsername);
+            userRepository.save(user);
+            return true;
+        }
+
+        return false;
+    }
+    public boolean updatePassword(String newPassword,Long id){
+        Optional<User> userOptional = userRepository.findById(id);
+        if(userOptional.isPresent()){
+            User user = userOptional.get();
+            user.setPassword(newPassword);
+            return true;
+        }
+        return false;
+    }
+    public boolean updateEmail(String newEmail,Long id){
+        Optional<User> userOptional = userRepository.findById(id);
+        if(userOptional.isPresent()){
+            User user = userOptional.get();
+            user.setEmail(newEmail);
+            return true;
+        }
+        return false;
+    }
+    public boolean updatePermission(String newPermission,Long id){
+        Optional<User> userOptional = userRepository.findById(id);
+        if(userOptional.isPresent()){
+            User user = userOptional.get();
+            user.setPermission(newPermission);
+            return true;
+        }
+
+        return false;
+    }
 
 
 
@@ -103,24 +142,41 @@ public class UserService {
 
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            return user.getPermission();
+            user.setPermission(newPermission);
+            userRepository.save(user);
+            return "yes";
         }
+
         return null;
     }
     public Optional<User> getUserById(long id){
         return userRepository.findById(id);
     }
 
-    public User updateUser(Long id, User user) {
-        Optional<User> userOptional = userRepository.findById(id);
-        if(userOptional.isPresent()){
-            User originalUser = userOptional.get();
-            originalUser.setEmail(user.getEmail());
-            originalUser.setPermission(user.getPermission());
+    public User updateUser(Long id, User userPayload) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isPresent()) {
+            User existingUser = optionalUser.get();
+            if(existingUser.getUsername().equals("ADMIN1")){
+                return null;
+            }
+            // Update only the fields you want to allow changes to:
+            existingUser.setEmail(userPayload.getEmail());
+            existingUser.setPermission(userPayload.getPermission());
+            System.out.println(userPayload.getPermission());
+            existingUser.setUsername(userPayload.getUsername());
+            existingUser.setAccesspage(userPayload.getAccesspage());
+            // optionally handle password if needed:
+            // existingUser.setPassword(userPayload.getPassword());
 
+            // Save the updated user to the DB
+            return userRepository.save(existingUser);
         }
+
+        // Return null if user not found
         return null;
     }
+
     public void createDefaultAdmin() {
         // Check if an admin already exists
         if (userRepository.findByUsername("admin1").isEmpty()) {

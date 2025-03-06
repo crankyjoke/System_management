@@ -30,6 +30,8 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins("http://localhost:8000")
+                        .allowedOrigins("http://10.31.148.8:8002/user/login")
+                        .allowedOrigins("http://10.31.148.8:8000/user/login")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowCredentials(true)
                         .allowedHeaders("*");

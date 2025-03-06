@@ -50,19 +50,48 @@ public class UserController {
         return userService.createUser(user);
     }
 
-    @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody User user) {
-        return userService.updateUser(id, user);
+    @PutMapping("/update/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userPayload) {
+        System.out.println(11111111);
+
+        User updatedUser = userService.updateUser(id, userPayload);
+
+
+        if (updatedUser == null) {
+            return ResponseEntity.notFound().build();
+        } else {
+            return ResponseEntity.ok(updatedUser);
+        }
     }
 
     @DeleteMapping("/delete/{id}")
     public boolean deleteUser(@PathVariable Long id){
-        boolean deleted = userService.deleteUser(id); // ✅ Ensure deleteUser() returns a boolean
-
+        boolean deleted = userService.deleteUser(id);
         return deleted;
     }
+    public class UsernameRequest {
+        private String username;
+        public String getUsername(){
+            return this.username;
+        }
+    }
 
-    @PutMapping("/{id}/permissions")
+    // 2) Use the DTO in your controller
+    @PostMapping("/modify/username/{id}")
+    public boolean modifyUsername(@PathVariable Long id, @RequestBody UsernameRequest request) {
+        // Now "request.getUsername()" is just "1111"
+        return userService.updateUsername(request.getUsername(), id);
+    }
+
+
+    @PostMapping("/modify/email/{id}")
+    public boolean modifyEmail(@PathVariable Long id, @RequestBody String newEmail){
+        return userService.updateEmail(newEmail, id);
+    }
+
+
+
+    @PutMapping("/setnewPermission/{id}")
     public String modifyUserPermissions(@PathVariable Long id, @RequestBody String newPermissions) {
         return userService.modifyPermission(newPermissions, id);
     }
@@ -88,7 +117,7 @@ public class UserController {
             session.invalidate();
         }
         SecurityContextHolder.clearContext();
-
+        System.out.println("logged out");
         return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
 

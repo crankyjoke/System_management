@@ -42,9 +42,9 @@ public class SecurityConfig {
                     return config;
                 }))
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS)) // Always create a session
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/logout", "/api/currentUser").permitAll()
+                        .requestMatchers("/login", "api/logout", "/api/currentUser").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
@@ -55,7 +55,7 @@ public class SecurityConfig {
                             response.setCharacterEncoding("UTF-8");
                             PrintWriter writer = response.getWriter();
 
-                            // ✅ Store user in session
+
                             request.getSession().setAttribute("user", authentication.getName());
 
                             Map<String, Object> responseData = new HashMap<>();
@@ -70,7 +70,7 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID") // Ensure session cookie is removed
+                        .deleteCookies("JSESSIONID")
                         .clearAuthentication(true)
                         .permitAll()
                 )
