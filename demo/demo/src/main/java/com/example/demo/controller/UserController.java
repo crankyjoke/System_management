@@ -52,7 +52,7 @@ public class UserController {
 
     @PutMapping("/update/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User userPayload) {
-        System.out.println(11111111);
+//        System.out.println(11111111);
 
         User updatedUser = userService.updateUser(id, userPayload);
 
@@ -62,6 +62,7 @@ public class UserController {
         } else {
             return ResponseEntity.ok(updatedUser);
         }
+
     }
 
     @DeleteMapping("/delete/{id}")
