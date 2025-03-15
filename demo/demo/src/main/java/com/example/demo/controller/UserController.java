@@ -77,7 +77,6 @@ public class UserController {
         }
     }
 
-    // 2) Use the DTO in your controller
     @PostMapping("/modify/username/{id}")
     public boolean modifyUsername(@PathVariable Long id, @RequestBody UsernameRequest request) {
         // Now "request.getUsername()" is just "1111"

@@ -12,6 +12,7 @@ public class UserPosition {
     private List<String> positionName;
     private Long balance;
     private String organization;
+
     public UserPosition(){
         
     }

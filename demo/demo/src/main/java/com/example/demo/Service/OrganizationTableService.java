@@ -13,51 +13,63 @@ public class OrganizationTableService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    /**
-     * Creates a new table for a unique organization.
-     */
+
     @Transactional
     public void createOrganizationTable(String organizationName) {
         String tableName = generateTableName(organizationName);
 
         String sql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
-                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
-                "position VARCHAR(255), " +
-                "balance DOUBLE)";
+                "id BIGINT PRIMARY KEY, " +
+                "username VARCHAR(255), " +
+                "organization VARCHAR(255))";  // Fix: Closing parenthesis
 
         entityManager.createNativeQuery(sql).executeUpdate();
     }
 
-    /**
-     * Inserts a new record into the organization's table.
-     */
     @Transactional
-    public void insertIntoOrganization(String organizationName, String position, Double balance) {
+    public boolean insertIntoOrganization(String organizationName, String username, Long id) {
         String tableName = generateTableName(organizationName);
 
-        String sql = "INSERT INTO " + tableName + " (position, balance) VALUES (:position, :balance)";
+        // Ensure the table exists before inserting data
+        createOrganizationTable(organizationName);
+
+        String sql = "INSERT INTO " + tableName + " (id, username, organization) VALUES (:id, :username, :organization)";
 
         entityManager.createNativeQuery(sql)
-                .setParameter("position", position)
-                .setParameter("balance", balance)
+                .setParameter("id", id)
+                .setParameter("username", username)
+                .setParameter("organization", organizationName)
                 .executeUpdate();
+
+        return true;
     }
 
-    /**
-     * Retrieves all records from a specific organization's table.
-     */
-    public List<Object[]> fetchOrganizationData(String organizationName) {
+//    public List<Object[]> fetchOrganizationData(String organizationName) {
+//        String tableName = generateTableName(organizationName);
+//
+//        try {
+//            String sql = "SELECT * FROM " + tableName;
+//            return entityManager.createNativeQuery(sql).getResultList();
+//        } catch (Exception e) {
+//            System.err.println("Error fetching data from " + tableName + ": " + e.getMessage());
+//            return List.of();
+//        }
+//    }
+
+
+    private String generateTableName(String organizationName) {
+        return "org_" + organizationName.replaceAll("[^a-zA-Z0-9_]", "_").toLowerCase();  // Fix: Sanitize input
+    }
+
+    public List<Object[]> fetchAllUsersByOrganization(String organizationName) {
         String tableName = generateTableName(organizationName);
 
-        String sql = "SELECT * FROM " + tableName;
-
-        return entityManager.createNativeQuery(sql).getResultList();
-    }
-
-    /**
-     * Helper method to sanitize and generate valid table names.
-     */
-    private String generateTableName(String organizationName) {
-        return "org_" + organizationName.replaceAll("\\s", "_").toLowerCase();
+        try {
+            String sql = "SELECT id, username FROM " + tableName;
+            return entityManager.createNativeQuery(sql).getResultList();
+        } catch (Exception e) {
+            System.err.println("Error fetching users from " + tableName + ": " + e.getMessage());
+            return List.of();  // Return empty list if table does not exist
+        }
     }
 }
