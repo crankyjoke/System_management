@@ -67,7 +67,7 @@ public class UserService {
             return true;
         }
 
-        return false; // Return false if user not found
+        return false;
     }
 
     public User createUser(String baseUsername,String rawPassword, String roles) {
@@ -174,14 +174,10 @@ public class UserService {
             System.out.println(userPayload.getPermission());
             existingUser.setUsername(userPayload.getUsername());
             existingUser.setAccesspage(userPayload.getAccesspage());
-            // optionally handle password if needed:
-            // existingUser.setPassword(userPayload.getPassword());
 
-            // Save the updated user to the DB
             return userRepository.save(existingUser);
         }
 
-        // Return null if user not found
         return null;
     }
 

@@ -8,31 +8,26 @@ import java.util.Random;
 
 public class RegisterVerification {
 
-    // Generate a 4-digit random number (ensuring it's always 4 digits)
     private int generateNumberCode() {
-        return 1000 + new Random().nextInt(9000); // Ensures number is between 1000-9999
+        return 1000 + new Random().nextInt(9000);
     }
 
-    // Method to verify the entered code
     public boolean verifyCode(int correctCode, int userInput) {
         return correctCode == userInput;
     }
 
-    // Method to send verification email
     public boolean sendVerification(String recipientEmail) {
         int verificationCode = generateNumberCode();
 
-        // SMTP Server Configuration
-        final String senderEmail = "your-email@example.com"; // Replace with your email
-        final String senderPassword = "your-password"; // Replace with your email password
+        final String senderEmail = "your-email@example.com";
+        final String senderPassword = "your-password";
 
         Properties props = new Properties();
-        props.put("mail.smtp.host", "smtp.gmail.com"); // Change if using another provider
-        props.put("mail.smtp.port", "587"); // Port for TLS
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587");
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true"); // Enable STARTTLS security
+        props.put("mail.smtp.starttls.enable", "true");
 
-        // Creating a new email session
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {

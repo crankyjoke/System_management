@@ -20,10 +20,7 @@ public class OrganizationController {
         this.organizationTableService = organizationTableService;
     }
 
-    /**
-     * Inserts user data into the correct "org_xxx" table.
-     * Expects a JSON body with { id, username, organization }.
-     */
+
     @PostMapping("/insertuser")
     public ResponseEntity<?> insertUser(@RequestBody Load load) {
         if (load.getOrganization() == null || load.getOrganization().trim().isEmpty()) {
@@ -35,9 +32,7 @@ public class OrganizationController {
         return ResponseEntity.status(500).body("Failed to insert user");
     }
 
-    /**
-     * Fetches all users from the specified "org_xxx" table.
-     */
+
     @GetMapping("/users/{organization}")
     public ResponseEntity<List<Map<String, Object>>> getAllUsers(@PathVariable String organization) {
 
@@ -53,9 +48,6 @@ public class OrganizationController {
         return ResponseEntity.ok(result);
     }
 
-    /**
-     * Creates a new org_ table for the given base name (if it doesn't exist).
-     */
     @PostMapping("/add/table")
     public ResponseEntity<String> addTable(@RequestBody String organization) {
         if (organization == null || organization.trim().isEmpty()) {
@@ -70,9 +62,6 @@ public class OrganizationController {
         }
     }
 
-    /**
-     * Returns all "org_*" tables in the DB.
-     */
     @GetMapping("/organization/tables")
     public ResponseEntity<List<String>> getAllOrganizationTables() {
         List<String> tables = organizationTableService.getAllOrganizationTables();

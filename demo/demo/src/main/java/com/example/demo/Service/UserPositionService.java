@@ -2,6 +2,7 @@ package com.example.demo.Service;
 import com.example.demo.model.UserPosition;
 import com.example.demo.model.User;
 import com.example.demo.repository.UserPositionRepository;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,13 +10,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
-
+import com.example.demo.Service.OrganizationTableService;
 @Service
 public class UserPositionService {
     private final UserPositionRepository userPositionRepository;
-
-    public UserPositionService(UserPositionRepository userPositionRepository){
+    private final OrganizationTableService organizationTableService;
+    public UserPositionService(UserPositionRepository userPositionRepository, OrganizationTableService organizationTableService){
         this.userPositionRepository = userPositionRepository;
+        this.organizationTableService = organizationTableService;
     }
 //    Long id, List<String> positionName, Long balance, String organization
     public UserPosition createUserPosition(Long id){
@@ -28,6 +30,7 @@ public class UserPositionService {
         Long balance = userPosition.getBalance();
         String organization = userPosition.getOrganization();
         UserPosition newUserPosition = new UserPosition(id,positionName, balance,organization);
+        organizationTableService.insertIntoOrganization(organization,"Default",id);
         return userPositionRepository.save(newUserPosition);
     }
 
