@@ -8,8 +8,10 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
@@ -96,28 +98,55 @@ public class UserController {
         return userService.modifyPermission(newPermissions, id);
     }
     @GetMapping("/currentUser")
-    public Map<String, Object> getCurrentUser(HttpServletRequest request) {
+    public Map<String, Object> getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
+        if (authentication == null
+                || authentication instanceof AnonymousAuthenticationToken) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
         }
-        HttpSession session = request.getSession(false);
 
-        Map<String, Object> userData = new HashMap<>();
-        userData.put("username", authentication.getName());
-        userData.put("roles", authentication.getAuthorities());
-        return userData;
+        return Map.of(
+                "username", authentication.getName(),
+                "roles",    authentication.getAuthorities()
+        );
     }
 
+//    @GetMapping("/currentUser")
+//    public Map<String, Object> getCurrentUser(HttpServletRequest request) {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//        if (authentication == null || !authentication.isAuthenticated()) {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated");
+//        }
+//        HttpSession session = request.getSession(false);
+//
+//        Map<String, Object> userData = new HashMap<>();
+//        userData.put("username", authentication.getName());
+//        userData.put("roles", authentication.getAuthorities());
+//        return userData;
+//    }
+
+//    @PostMapping("/logout")
+////    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
+////        HttpSession session = request.getSession(false);
+////        if (session != null) {
+////            session.invalidate();
+////        }
+////        SecurityContextHolder.clearContext();
+////        System.out.println("logged out");
+////        return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
+////    }
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.invalidate();
+    public ResponseEntity<?> logout(HttpServletRequest request,
+                                    HttpServletResponse response) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            // This does *everything*: session.invalidate, clear context,
+            // delete remember‑me cookie (if configured), publish LogoutSuccessEvent…
+            new SecurityContextLogoutHandler().logout(request, response, auth);
         }
-        SecurityContextHolder.clearContext();
-        System.out.println("logged out");
         return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
 
